@@ -847,7 +847,11 @@ class GDAL(Parser):
                     info = next(filter(lambda zipinfo: fnmatch.fnmatch(zipinfo.filename, self.zip), z.infolist()))
                 if info:
                     self.zip = info.filename
-                self.source_layer = ['/vsizip/' + os.path.abspath(archive) + '/' + self.zip]
+                # gdalsrsinfo vsizip need a .zip named file
+                link = archive + '.zip'
+                if not os.path.lexists(link):
+                    os.symlink(archive, link)
+                self.source_layer = ['/vsizip/' + os.path.abspath(link) + '/' + self.zip]
             elif self.source.is_file():
                 # plain file source: feed the real path straight to ogr2ogr, no copy
                 self.source_layer = [self.source.path()]
